@@ -26,6 +26,13 @@ main {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	position: relative;
+	h1 {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translate(-50%);
+	}
 }
 .container {
 	width: 1000px;
@@ -135,6 +142,9 @@ main {
 					rgba(255, 255, 255, 0) 70%
 				);
 			}
+			p {
+				pointer-events: none;
+			}
 			img {
 				width: 80%;
 				display: block;
@@ -217,7 +227,9 @@ main {
 		height: 100%;
 
 		position: relative;
+		user-select: none;
 		.main-img {
+			user-select: none;
 			position: absolute;
 			left: 50%;
 			top: 62%;
@@ -225,8 +237,10 @@ main {
 			// border: 1px solid black;
 			width: 50%;
 			height: auto;
+
 			img {
 				width: 100%;
+				pointer-events: none;
 			}
 			.item_pos {
 				// opacity: 0;
@@ -234,6 +248,7 @@ main {
 				position: absolute;
 				overflow: visible;
 				border: 1px solid green;
+				display: block;
 				&.activated {
 					display: block;
 				}
