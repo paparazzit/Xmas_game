@@ -54,6 +54,11 @@ main {
 			display: block;
 			transform: translate(-50%, -50%);
 		}
+		&.stick {
+			width: 100px;
+			height: 100px;
+			opacity: 0.8;
+		}
 		img {
 			display: block;
 			width: 100%;
@@ -133,6 +138,13 @@ main {
 			align-items: center;
 			justify-content: center;
 			transition: 0.3s all ease-in-out;
+			&.deactivate {
+				border-radius: 30%;
+				opacity: 0.7;
+				background-color: gray;
+				pointer-events: none;
+				transform: scale(0.8);
+			}
 			&:hover {
 				cursor: pointer;
 				transform: scale(0.9);
@@ -237,18 +249,61 @@ main {
 			// border: 1px solid black;
 			width: 50%;
 			height: auto;
+			.text-bubble {
+				position: absolute;
+				background: #00abbbb1;
+				border-radius: 10px;
+				min-width: 250px;
+				min-height: 150px;
+				top: -10%;
+				left: -10%;
+				transform: translate(-50%, -50%);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				display: none;
+				&:after {
+					content: "";
+					position: absolute;
+					top: 100%;
+					left: 70%;
+
+					border: 54px solid transparent;
+					border-top-color: #00abbbb1;
+					border-bottom: 0;
+					border-right: 0;
+					// margin-left: -27px;
+					// margin-bottom: -54px;
+				}
+			}
 
 			img {
 				width: 100%;
 				pointer-events: none;
+			}
+			.face {
+				pointer-events: none;
+				position: absolute;
+				top: 20%;
+				left: 2%;
+				// border: 2px solid red;
+				width: 45%;
+				img {
+					display: block;
+					width: 100%;
+				}
+				&.beating {
+					top: 21%;
+				}
 			}
 			.item_pos {
 				// opacity: 0;
 				display: none;
 				position: absolute;
 				overflow: visible;
-				border: 1px solid green;
+				// border: 1px solid green;
 				display: block;
+
 				&.activated {
 					display: block;
 				}

@@ -4,6 +4,8 @@ function Game(opt) {
 	this.activeItem = null;
 	this.width = window.innerWidth;
 	this.height = window.innerHeight;
+	this.faceImg = document.querySelector(".face img");
+
 	this.logMessages = {
 		msg0: `Hola, I'm Catalonian Christmas log...`,
 		msg1: "I'm part of some unique Christmas traditions",
@@ -26,16 +28,27 @@ function Game(opt) {
 	this.cursorElement = document.querySelector(".cursor");
 	this.gamePanel = document.querySelector(".game-panel");
 	this.mainImage = document.querySelector(".main-img");
-	this.logClicks = 1;
+	this.logClicks = 0;
 	// DIMENSION RESET
 	this.leftReset = this.container.offsetLeft;
 	this.topReset = this.container.offsetTop;
+
+	// AUDIO SETUP
+	this.generalClicks = new Audio("./assets/clickSound.wav");
+	this.generalClicks.volume = 0.7;
+	this.placeItem = new Audio("./assets/useItem.wav");
+	this.eatCandy = new Audio("./assets/eat.wav");
+	this.eatCandy.volume = 0.5;
+	this.burp = new Audio("./assets/burp.wav");
+	this.burp.volume = 0.2;
+	this.hitting = new Audio("./assets/hitting.wav");
+	this.fart = new Audio("./assets/fart_2.wav");
 
 	this.createInventory = function () {
 		let text = "";
 		for (let prop in this.inventory) {
 			this[prop] = this.inventory[prop];
-			text += `<div class="thumb" data-destination="${this[prop].destination}" data-item="${prop}"><img src="${this[prop].img}" alt=""></div>`;
+			text += `<div class="thumb" data-destination="${this[prop].destination}" data-item="${prop}"><img src="./${this[prop].img}" alt=""></div>`;
 			console.log(this[prop].img);
 		}
 		text += '<div class="thumb" data-item="drop" ><p>DROP</p></div>';
@@ -70,6 +83,11 @@ function Game(opt) {
 		this.cursorElement.classList.add("active");
 		// position element on click
 		if (this.width > 521) {
+			if (this.activeItem.name === "stick") {
+				this.cursorElement.classList.add("stick");
+			} else {
+				this.cursorElement.classList.remove("stick");
+			}
 			this.cursorElement.style.left = ev.clientX - this.leftReset + "px";
 			this.cursorElement.style.top = ev.clientY - this.topReset + "px";
 			this.trackItem();
@@ -125,12 +143,28 @@ function Game(opt) {
 			this.activeItem.name === "stick" &&
 			!this.gameStates.beatTheLog
 		) {
+			console.log(ev.target);
 			this.beatingLog++;
+			if (this.beatingLog > 0) {
+				this.faceImg.src = "./assets/angry face.png";
+			}
 			if (this.beatingLog > 6) {
 				console.log("FINISH");
+
+				this.fart.volume = 0.6;
+				this.hitting.play();
+				setTimeout(() => {
+					this.fart.play();
+					this.faceImg.src = "./assets/face.png";
+				}, 600);
 				this.gameStates.beatTheLog = true;
+				this.removeItem();
+				this.dropItem();
 				return;
 			}
+			this.faceImg.parentElement.classList.add("beating");
+
+			this.hitting.play();
 			console.log("LUPAJ BRATE ", this.beatingLog);
 
 			return;
@@ -145,8 +179,12 @@ function Game(opt) {
 			ev.target.getAttribute("data-item") === "hat"
 		) {
 			console.log("spustam kapicu");
+			console.log(this.activeItem);
 			this.gameStates.placeHat = true;
+			this.removeItem();
 			this.useItem(ev.target);
+
+			this.placeItem.play();
 			return;
 		}
 		if (
@@ -158,8 +196,10 @@ function Game(opt) {
 		) {
 			this.candyFed++;
 			console.log("DAJEM CANDY", this.activeItem, " fedd: ", this.candyFed);
-			this.checkCandy();
+			this.checkCandy(ev.target);
+
 			this.dropItem();
+			this.placeItem.play();
 			return;
 		}
 		if (
@@ -169,28 +209,51 @@ function Game(opt) {
 			!this.gameStates.putBlanket
 		) {
 			console.log("OBUCI CEBE");
-			this.useItem(ev.target, "/assets/blanket2.png");
+			this.removeItem();
+			this.useItem(ev.target, "./assets/blanket2.png");
 			this.gameStates.putBlanket = true;
 			this.dropItem();
+			this.placeItem.play();
+
+			setTimeout(() => {
+				this.faceImg.src = "./assets/sleepyFace.png";
+			}, 400);
 			return;
 		}
 	};
-	this.checkCandy = function () {
+	this.checkCandy = function (target) {
 		if (this.candyFed === 3) {
 			console.log("NAHRANIO SAM DRVO");
 			this.gameStates.feedCandy = true;
+			target.style.pointerEvents = "none";
+			this.eatCandy.play();
+			setTimeout(() => {
+				this.burp.play();
+			}, 900);
+			this.removeItem();
+			return;
 		}
+		this.removeItem();
+		this.eatCandy.play();
 	};
 
 	this.useItem = function (target, img) {
-		console.log(target);
 		console.log(this.activeItem.img);
 		let imgSrc = img;
 		if (!img) {
 			imgSrc = this.activeItem.img;
 		}
 		target.innerHTML = `<img src="${imgSrc}" alt=""/>`;
+		target.style.pointerEvents = "none";
+
 		this.dropItem();
+	};
+	this.removeItem = function () {
+		this.items.forEach((item) => {
+			if (item.getAttribute("data-item") === this.activeItem.name) {
+				item.classList.add("deactivate");
+			}
+		});
 	};
 
 	// #REGION EVENT
@@ -199,6 +262,9 @@ function Game(opt) {
 		window.addEventListener("resize", () => {
 			this.width = window.innerWidth;
 			this.height = window.innerHeight;
+		});
+		this.container.addEventListener("mousedown", (e) => {
+			if (!this.activeItem) this.generalClicks.play();
 		});
 
 		this.mainImage.addEventListener("click", this.mainImageClicks.bind(this));
